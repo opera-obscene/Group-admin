@@ -7,7 +7,7 @@ let events = [
   },
   {
     name: "Zone 4 2018",
-    active: false,
+    active: true,
     invitees: ["Frank Hall", "Grace Kim", "Henry Adams"]
   },
   {
@@ -17,21 +17,29 @@ let events = [
   }
 ];
 
-// Current event container
+// Containers
 const currentContainer = document.getElementById('current-event-container');
 const pastContainer = document.getElementById('past-events-container');
 
-// Function to render current event
+// Render current event
 function renderCurrentEvent() {
-  const currentEvent = events.find(ev => ev.active);
   currentContainer.innerHTML = '';
+  const currentEvent = events.find(ev => ev.active);
 
   if(currentEvent){
     const div = document.createElement('div');
-    div.className = 'event';
+    div.className = 'event active';
     div.innerHTML = `
-      <strong>${currentEvent.name}</strong>
+      <h3>${currentEvent.name}</h3>
       <button onclick="closeEvent('${currentEvent.name}')">Close Event</button>
+      <div class="add-invitee">
+        <input type="text" placeholder="New invitee full name" id="new-${currentEvent.name}">
+        <button onclick="addInvitee('${currentEvent.name}')">Add Invitee</button>
+      </div>
+      <button onclick="toggleInvitees(this)">Show Invitees</button>
+      <div class="invitees hidden">
+        ${currentEvent.invitees.map(i => `<div>${i}</div>`).join('')}
+      </div>
     `;
     currentContainer.appendChild(div);
   } else {
@@ -45,14 +53,14 @@ function renderCurrentEvent() {
   }
 }
 
-// Function to render past events
+// Render past events
 function renderPastEvents() {
   pastContainer.innerHTML = '';
-  events.forEach(ev => {
+  events.filter(ev => !ev.active).forEach(ev => {
     const div = document.createElement('div');
     div.className = 'event';
     div.innerHTML = `
-      <strong>${ev.name}</strong>
+      <h3>${ev.name}</h3>
       <button onclick="toggleInvitees(this)">Show Invitees</button>
       <div class="invitees hidden">
         ${ev.invitees.map(i => `<div>${i}</div>`).join('')}
@@ -70,13 +78,25 @@ function closeEvent(name){
   renderPastEvents();
 }
 
-// Create new event (for demo purposes, creates a placeholder)
+// Create new event
 function createEvent(){
   const newName = prompt("Enter new event name:");
   if(newName){
     events.push({name: newName, active: true, invitees: []});
     renderCurrentEvent();
     renderPastEvents();
+  }
+}
+
+// Add invitee to current event
+function addInvitee(eventName){
+  const input = document.getElementById(`new-${eventName}`);
+  const value = input.value.trim();
+  if(value){
+    const event = events.find(ev => ev.name === eventName);
+    event.invitees.push(value);
+    input.value = '';
+    renderCurrentEvent();
   }
 }
 
